@@ -1,7 +1,7 @@
 # NodeJS-API-JWT-Base
 
 1. Install packages with `yarn install`
-2. Create a .env file with some dummy data with `yarn init-admin``
+2. Create a .env file with some dummy data with `yarn init-admin`
 3. run with nodemon using `yarn serve`
 
 
