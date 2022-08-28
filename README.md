@@ -12,3 +12,6 @@ Fork it, do whatever you need, it is meant to be a starting point with authentic
 
 ## Authentication
 Authentication is done using JWT and slapping that token onto a cookie which we can read during the whole user session.
+
+## Database
+Users are stored in an sqlite database in the `/api-sqlite` folder
