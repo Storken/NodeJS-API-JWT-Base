@@ -1,6 +1,5 @@
 export const dbPath = './sqlite/DB.sqlite'
 export const dbRoot = './sqlite/'
-export const usersDbPath = './api-sqlite/users.sqlite'
 export const contractDbPath = './api-sqlite/eth-contracts.sqlite'
 export const nullAddress = '0x0000000000000000000000000000000000000000'
 export const myAddress = '0x314e5699db4756138107AE7d7EeDDf5708583ff5'

@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../config'
-import { findUser } from '../database/user-queries'
-import bcrypt from 'bcrypt'
 
 export const auth = (req, res, next) => {
   const token = req.cookies.access_token

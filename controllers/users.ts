@@ -6,7 +6,7 @@ import {
   findUsers,
   removeUser,
   updateUser
-} from '../database/user-queries'
+} from '../services/users'
 import bcrypt from 'bcrypt'
 import { v4 as uuidv4 } from 'uuid'
 import { JWT_SECRET, SALT_ROUNDS } from '../config'

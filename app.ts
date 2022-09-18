@@ -10,10 +10,10 @@ import {
   login,
   postUser,
   putUser
-} from './api/endpoints'
-import { initContractDatabase } from './database/user-queries'
+} from './controllers/users'
+import { initContractDatabase } from './services/users'
 import bodyParser from 'body-parser'
-import { auth } from './api/auth'
+import { auth } from './middlewares/auth'
 import cookieParser from "cookie-parser"
 
 let WORKERS = process.env.WEB_CONCURRENCY || 1

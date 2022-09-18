@@ -1,5 +1,4 @@
 import {
-  usersDbPath,
   sqlCreateUsersTable,
   sqlInsertUser,
   sqlSelectUserByEmail,
@@ -7,11 +6,13 @@ import {
   sqlSelectAllUsers,
   sqlUpdateUser,
   sqlRemoveUser,
-  sqlInsertUserWithPermissionLevel
-} from './constants'
+  sqlInsertUserWithPermissionLevel,
+  dbPath
+} from '../database/constants'
 import DatabaseConstructor from 'better-sqlite3'
+import { CreateUser, User } from '../models/users';
 
-export const usersDb = new DatabaseConstructor(usersDbPath, {
+export const usersDb = new DatabaseConstructor(dbPath, {
   verbose: console.log
 })
 
@@ -61,16 +62,3 @@ export const findUser = (userId: string) => {
 export const findUserByEmail = (email: string) => {
   return usersDb.prepare(sqlSelectUserByEmail).get({ email }) as User
 }
-
-export type CreateUser = {
-  email: string
-  password: string
-  salt: string
-  user_id: string
-  permission_level?: number
-}
-
-export type User = {
-  token?: string
-  lastLoggedIn?: Date
-} & CreateUser
