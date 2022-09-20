@@ -1,6 +1,5 @@
 export const dbPath = './sqlite/DB.sqlite'
 export const dbRoot = './sqlite/'
-export const contractDbPath = './api-sqlite/eth-contracts.sqlite'
 
 /**
  * Users queries
