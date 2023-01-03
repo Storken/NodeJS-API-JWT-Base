@@ -8,49 +8,63 @@ import {
   getUser,
   getUsers,
   login,
+  ping,
   postUser,
-  putUser
+  putActivateAccount,
+  putEmail,
+  putNewsletter,
+  putPassword,
+  recoverPassword
 } from './controllers/users'
-import { initContractDatabase } from './services/users'
 import bodyParser from 'body-parser'
 import { auth } from './middlewares/auth'
-import cookieParser from "cookie-parser"
+import cookieParser from 'cookie-parser'
+import { initUserDatabase } from './services/users'
+import { sendForgotPasswordEmail } from './controllers/mail'
 
 let WORKERS = process.env.WEB_CONCURRENCY || 1
-let PORT = process.env.PORT || 5001
-const ALLOWED_ORIGINS = ['http://localhost', 'https://bunnyga.me']
+const ALLOWED_ORIGINS = ['http://localhost:3000', 'https://linkbun.io']
 
 /*
 throng(start, {
   workers: 1,
   lifetime: Infinity
 })*/
+
+export const app = express()
 start()
 
 function start () {
-  const app = express()
-  initContractDatabase()
+  initUserDatabase()
   app
+    .use(cookieParser())
     .use(compression())
     .use(helmet())
     .use(bodyParser.json())
-    .use(cookieParser())
     .use(
       cors({
+        credentials: true,
         origin: ALLOWED_ORIGINS,
-        methods: 'GET'
+        methods: 'GET, POST, PUT, DELETE'
       })
     )
 
   app
+    .get('/ping', ping)
     //user-endpoints
-    .put('/users/:userId', auth, putUser)
-    .get('/users/:userId', auth, getUser)
-    .delete('/users/:userId', auth, deleteUser)
-    .get('/users/', auth, getUsers)
+    .get('/users', auth, getUser)
+    .delete('/users', auth, deleteUser)
+    .put('/users/password', auth, putPassword)
+    .put('/users/email', auth, putEmail)
+    .get('/users/all', auth, getUsers)
     .post('/users', postUser)
     .post('/login', login)
-    .listen(PORT, () => {
-      console.log('api is listening on port:', PORT)
-    })
+    .post('/forgot-password', sendForgotPasswordEmail)
+    .post('/recover-password', recoverPassword)
+    .put('/users/activate', putActivateAccount)
+    .put('/users/newsletter', auth, putNewsletter)
+
+  if (process.env.NODE_ENV !== 'test') {
+    import('./server')
+  }
 }

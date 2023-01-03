@@ -4,30 +4,30 @@ import {
   sqlSelectUserByEmail,
   sqlSelectUser,
   sqlSelectAllUsers,
-  sqlUpdateUser,
   sqlRemoveUser,
   sqlInsertUserWithPermissionLevel,
-  dbPath
+  sqlUpdateUserPassword,
+  sqlUpdateUserEmail,
+  sqlUpdateUserNewsletter,
+  sqlActivateUser
 } from '../database/constants'
-import DatabaseConstructor from 'better-sqlite3'
-import { CreateUser, User } from '../models/users';
+import { db } from '../database/db'
+import { User, DBUser, CreateUser, UpdateUser, Email } from '../models/users'
 
-export const usersDb = new DatabaseConstructor(dbPath, {
-  verbose: console.log
-})
-
-export const initContractDatabase = () => {
+export const initUserDatabase = () => {
   console.log('Connected to the SQLite database.')
   try {
-    usersDb.prepare(sqlCreateUsersTable).run()
+    db.prepare(sqlCreateUsersTable).run()
     const password = process.env.SUPER_ADMIN_PASSWORD_HASHED
-    const user_id = process.env.SUPER_ADMIN
+    const userId = process.env.SUPER_ADMIN
     let user = {
-      email: user_id,
-      user_id,
+      email: userId,
+      userId,
       password,
-      permission_level: 3,
-      salt: process.env.SUPER_ADMIN_PASSWORD_SALT
+      permissionLevel: 3,
+      salt: process.env.SUPER_ADMIN_PASSWORD_SALT,
+      newsletter: false,
+      active: true
     }
 
     addUserWithPermissionLevel(user)
@@ -36,29 +36,69 @@ export const initContractDatabase = () => {
   }
 }
 
-export const addUserWithPermissionLevel = (user: CreateUser) => {
-  usersDb.prepare(sqlInsertUserWithPermissionLevel).run(user)
+export const addUserWithPermissionLevel = (user: User) => {
+  db.prepare(sqlInsertUserWithPermissionLevel).run(user)
 }
+
+const prepareUser = (user: CreateUser | UpdateUser | User | Email) => {
+  user.email = user.email.trim()
+  user.email = user.email.toLowerCase()
+  return user
+}
+
 export const addUser = (user: CreateUser) => {
-  usersDb.prepare(sqlInsertUser).run(user)
+  db.prepare(sqlInsertUser).run({
+    ...prepareUser(user),
+    newsletter: user.newsletter ? 1 : 0
+  })
 }
 
-export const updateUser = (user: CreateUser) => {
-  usersDb.prepare(sqlUpdateUser).run(user)
+export const updateUserEmail = (user: UpdateUser) => {
+  db.prepare(sqlUpdateUserEmail).run(prepareUser(user))
 }
 
-export const removeUser = (user: CreateUser) => {
-  usersDb.prepare(sqlRemoveUser).run(user)
+export const updateUserPassword = (user: UpdateUser) => {
+  db.prepare(sqlUpdateUserPassword).run(user)
+}
+
+export const updateUserNewsletter = (userId: string, newsletter: boolean) => {
+  db.prepare(sqlUpdateUserNewsletter).run({
+    userId,
+    newsletter: newsletter ? 1 : 0
+  })
+}
+
+export const updateActiveAccount = (userId: string) => {
+  db.prepare(sqlActivateUser).run({ userId })
+}
+
+export const removeUser = (userId: string) => {
+  db.prepare(sqlRemoveUser).run({ userId })
 }
 
 export const findUsers = () => {
-  return usersDb.prepare(sqlSelectAllUsers).all() as User[]
+  return db.prepare(sqlSelectAllUsers).all() as User[]
+}
+
+export const findUserPermissionLevel = (userId: string) => {
+  return (db.prepare(sqlSelectUser).get({ userId }) as DBUser).permission_level
 }
 
 export const findUser = (userId: string) => {
-  return usersDb.prepare(sqlSelectUser).get({ userId }) as User
+  return fromDb(db.prepare(sqlSelectUser).get({ userId }))
 }
 
 export const findUserByEmail = (email: string) => {
-  return usersDb.prepare(sqlSelectUserByEmail).get({ email }) as User
+  return db.prepare(sqlSelectUserByEmail).get(prepareUser({ email })) as DBUser
+}
+
+const fromDb = (dbUser: DBUser): User => {
+  const { user_id, email, newsletter, active, ...user } = dbUser
+  return {
+    userId: user_id,
+    email,
+    newsletter: Boolean(newsletter),
+    active: Boolean(active),
+    ...user
+  }
 }

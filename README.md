@@ -15,3 +15,9 @@ Authentication is done using JWT and slapping that token onto a cookie which we 
 
 ## Database
 Users are stored in an sqlite database in the `/api-sqlite` folder
+
+## Cronjobs
+The two cronjobs in use are following:
+
+0 2 * * * /bin/sh /home/dev/linkbun-api/backup.sh
+* * * * * /bin/sh /home/dev/linkbun-api/gitpoll.sh

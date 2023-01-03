@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    command: node app.js 
+    restart: unless-stopped
+    ports:
+      - 5002:5002
+    volumes:
+      - .:/src
+      - /home/dev/sqlite/linkbun-api/current/DB.sqlite:/usr/src/app/sqlite/DB.sqlite
+
+  tunnel:
+    container_name: cloudflared-tunnel
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    links:
+      - api:linkbun-api
+    environment:
+      - TUNNEL_TOKEN=eyJhIjoiOGNmM2FhMTdkOGM1NDVjZjIzZGM4YzA4NTYyNTE3YmYiLCJ0IjoiODI0OTIyMjItNmMxMi00ZWY2LWFkNjgtZjBmNTczNDA3ZTUxIiwicyI6IlpUTm1PVGRoTVdNdE5qSmxaaTAwTVdaaUxUaGhObU10TXpOak9XWmpNbVJpWVRCaCJ9
